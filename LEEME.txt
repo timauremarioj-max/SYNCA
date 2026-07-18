@@ -1,0 +1,42 @@
+═══════════════════════════════════════════════════════════════
+  SYNCA · Sistema Académico · UNEFA Núcleo Falcón
+  Ingeniería de Sistemas — 5to Semestre — 2026
+  Autores: Mario Timaure, Enmanuel Chirino, Jesús Robertiz
+═══════════════════════════════════════════════════════════════
+
+CÓMO EJECUTAR
+─────────────
+1. Instalar dependencias (solo la primera vez):
+      pip install -r requirements.txt
+
+2. Cargar datos de demostración (solo la primera vez):
+      python seed_db.py
+
+3. Iniciar la aplicación:
+      python run.py
+
+4. Abrir en el navegador:
+      http://localhost:5000
+
+
+CREDENCIALES DE PRUEBA (contraseña: unefa123)
+──────────────────────────────────────────────
+DOCENTES:
+  Cédula: 31091513  →  Jesús Robertiz    (Programación)
+  Cédula: 33509133  →  Enmanuel Chirino  (Física / Química)
+  Cédula: 31150410  →  Mario Timaure     (Lenguaje de Programación)
+
+ESTUDIANTES:
+  Cédula: 20123456  →  Ana Pérez         (⚠ En riesgo por inasistencias)
+  Cédula: 20123457  →  Luis Gómez
+  Cédula: 20123458  →  María Rodríguez
+  Cédula: 20123459  →  Carlos Fernández
+
+
+REINICIAR LA BASE DE DATOS
+───────────────────────────
+  del instance\synca_dev.db   (Windows)
+  python seed_db.py
+  python run.py
+
+═══════════════════════════════════════════════════════════════

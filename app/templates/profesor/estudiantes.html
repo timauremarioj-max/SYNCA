@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block titulo %}Estudiantes{% endblock %}
+{% block contenido %}
+
+<div class="migas"><a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo; Estudiantes</div>
+<div class="pagina-titulo">Buscar Estudiantes</div>
+
+<div class="bloque" style="margin-bottom:18px;">
+  <div class="bloque-cabecera">Búsqueda</div>
+  <div class="bloque-cuerpo" style="padding:16px;">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1;min-width:160px;">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">Cédula</label>
+        <input type="text" name="cedula" value="{{ cedula }}"
+               placeholder="Ej: 20123456"
+               style="width:100%;padding:8px 10px;border:1px solid #d0d4db;border-radius:4px;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">Nombre o apellido</label>
+        <input type="text" name="nombre" value="{{ nombre }}"
+               placeholder="Ej: Pérez"
+               style="width:100%;padding:8px 10px;border:1px solid #d0d4db;border-radius:4px;">
+      </div>
+      <button type="submit" class="btn btn-primario">Buscar</button>
+      {% if busco %}
+      <a href="{{ url_for('profesor.estudiantes') }}" class="btn btn-secundario">Limpiar</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+{% if busco %}
+<div class="bloque">
+  <div class="bloque-cabecera">
+    Resultados — {{ resultados|length }} estudiante(s) encontrado(s)
+  </div>
+  <div class="bloque-cuerpo">
+    {% if resultados %}
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Nombre completo</th>
+          <th>Carrera</th>
+          <th>Semestre</th>
+          <th>Sección</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in resultados %}
+        <tr>
+          <td class="mono">{{ u.cedula }}</td>
+          <td>{{ u.nombre }} {{ u.apellido }}</td>
+          <td>{{ u.estudiante.carrera if u.estudiante else '—' }}</td>
+          <td>{{ u.estudiante.semestre if u.estudiante else '—' }}</td>
+          <td class="mono">{{ u.estudiante.nombre_seccion if u.estudiante else '—' }}</td>
+          <td>
+            <a class="btn btn-secundario btn-sm"
+               href="{{ url_for('profesor.estudiante_detalle', cedula_est=u.cedula) }}">
+              Ver detalle
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="sin-datos">No se encontraron estudiantes con esos criterios.</div>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="bloque">
+  <div class="bloque-cuerpo" style="padding:20px;">
+    <p class="texto-suave">Ingrese una cédula o nombre para buscar estudiantes.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base_auth.html' %}
+{% block titulo %}Recuperar contraseña{% endblock %}
+{% block contenido %}
+<div class="auth-logo-bloque">
+  <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SYNCA" class="auth-logo-img">
+  <div class="logo-nombre">SYNCA</div>
+  <div class="logo-subtitulo">Sistema Académico</div>
+</div>
+<div class="auth-tarjeta">
+  <div class="auth-titulo">Recuperar contraseña</div>
+  <p style="font-size:0.85rem;color:#5a6375;margin-bottom:16px;text-align:center;">
+    Ingrese su cédula de identidad y nos pondremos en contacto con usted para restablecer su contraseña.
+  </p>
+  <form method="POST">
+    {{ form.hidden_tag() if form else '' }}
+    <div class="campo-grupo">
+      <label>Cédula de identidad</label>
+      <input type="text" name="cedula" placeholder="Ingrese su cédula">
+    </div>
+    <button type="submit" class="btn-ingresar">Enviar solicitud</button>
+  </form>
+  <a class="auth-link" href="{{ url_for('auth.login') }}">← Volver al inicio de sesión</a>
+</div>
+{% endblock %}

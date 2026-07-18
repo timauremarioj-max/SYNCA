@@ -1,0 +1,10 @@
+{% extends 'base_auth.html' %}
+{% block titulo %}Error del servidor{% endblock %}
+{% block contenido %}
+<div style="text-align:center; padding:60px 20px;">
+  <div style="font-size:4rem; font-weight:900; color:#b52a2a;">500</div>
+  <div style="font-size:1.3rem; font-weight:700; margin:16px 0 8px; color:#1B3A6B;">Error interno del servidor</div>
+  <p style="color:#5a6375;">Ocurrió un error inesperado. Por favor intente de nuevo.</p>
+  <a href="/" style="color:#1B3A6B; font-weight:600;">← Volver al inicio</a>
+</div>
+{% endblock %}

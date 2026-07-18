@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}SYNCA{% endblock %} · UNEFA</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app-contenedor">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button type="button" class="menu-hamburguesa" id="btn-menu" aria-label="Abrir menú" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SYNCA" class="topbar-logo-img">
+      <div>
+        <span style="font-weight:900;font-size:1rem;color:#1B3A6B;letter-spacing:1.5px;">SYNCA</span>
+        <span class="topbar-sistema">&nbsp;Sistema Académico</span>
+      </div>
+    </div>
+    {% if current_user.is_authenticated %}
+    <div class="topbar-usuario">
+      <div class="icono-persona">&#9786;</div>
+      <div>
+        <span class="nombre">{{ current_user.nombre }} {{ current_user.apellido }}</span>
+        <span class="rol">{{ current_user.rol }}</span>
+      </div>
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="app-cuerpo">
+    <!-- Fondo oscuro al abrir el menú en móvil -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <ul class="sidebar-nav">
+      {% if current_user.is_authenticated %}
+
+        {% if current_user.rol == 'Estudiante' %}
+          <li><a href="{{ url_for('estudiante.panel') }}"
+                 class="{{ 'activo' if request.endpoint=='estudiante.panel' }}">
+            <span class="icono-menu">&#8962;</span> Dashboard
+          </a></li>
+          <li><a href="{{ url_for('estudiante.notas') }}"
+                 class="{{ 'activo' if request.endpoint=='estudiante.notas' }}">
+            <span class="icono-menu">&#9783;</span> Calificaciones
+          </a></li>
+          <li><a href="{{ url_for('estudiante.asistencias') }}"
+                 class="{{ 'activo' if request.endpoint=='estudiante.asistencias' }}">
+            <span class="icono-menu">&#9201;</span> Asistencias
+          </a></li>
+          <li><a href="{{ url_for('estudiante.horario') }}"
+                 class="{{ 'activo' if request.endpoint=='estudiante.horario' }}">
+            <span class="icono-menu">&#128197;</span> Horario Oficial
+          </a></li>
+          <li><a href="{{ url_for('estudiante.agenda') }}"
+                 class="{{ 'activo' if request.endpoint in ('estudiante.agenda','estudiante.agenda_nueva','estudiante.agenda_eliminar') }}">
+            <span class="icono-menu">&#128203;</span> Agenda Personal
+          </a></li>
+          <li><a href="{{ url_for('estudiante.perfil') }}"
+                 class="{{ 'activo' if request.endpoint=='estudiante.perfil' }}">
+            <span class="icono-menu">&#9786;</span> Perfil
+          </a></li>
+
+        {% elif current_user.rol == 'Profesor' %}
+          <li><a href="{{ url_for('profesor.panel') }}"
+                 class="{{ 'activo' if request.endpoint=='profesor.panel' }}">
+            <span class="icono-menu">&#8962;</span> Inicio
+          </a></li>
+          <li><a href="{{ url_for('profesor.mis_secciones') }}"
+                 class="{{ 'activo' if request.endpoint in ('profesor.mis_secciones','profesor.crear_seccion','profesor.eliminar_seccion') }}">
+            <span class="icono-menu">&#128218;</span> Mis secciones
+          </a></li>
+          <li><a href="{{ url_for('profesor.mi_horario') }}"
+                 class="{{ 'activo' if request.endpoint in ('profesor.mi_horario','profesor.mi_horario_agregar','profesor.mi_horario_eliminar') }}">
+            <span class="icono-menu">&#128336;</span> Mi horario
+          </a></li>
+          <li><a href="{{ url_for('profesor.perfil') }}"
+                 class="{{ 'activo' if request.endpoint=='profesor.perfil' }}">
+            <span class="icono-menu">&#9786;</span> Perfil
+          </a></li>
+        {% endif %}
+
+      {% endif %}
+      </ul>
+      <div class="sidebar-cerrar">
+        <a href="{{ url_for('auth.logout') }}">&#10006; Cerrar sesión</a>
+      </div>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="contenido">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+          <div class="flash-item flash-{{ cat }}" style="margin-bottom:12px;">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block contenido %}{% endblock %}
+    </main>
+  </div>
+
+  <footer class="footer">
+    &copy; 2025 UNEFA Núcleo Falcón &ndash; SYNCA. Todos los derechos reservados.
+  </footer>
+</div>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

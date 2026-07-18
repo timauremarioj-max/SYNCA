@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block titulo %}Agenda Personal{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Agenda Personal</div>
+
+<!-- Aviso de independencia -->
+<div class="msg-info" style="margin-bottom:18px;">
+  <span class="icono-i">ℹ</span>
+  Su agenda personal es <strong>privada</strong> y completamente independiente del horario oficial.
+  Los cambios que realice aquí no afectan las secciones ni son visibles para sus docentes.
+</div>
+
+<!-- Formulario para agregar -->
+<div class="bloque" style="margin-bottom:18px;">
+  <div class="bloque-cabecera">Agregar nuevo elemento</div>
+  <form method="POST" action="{{ url_for('estudiante.agenda_nueva') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div style="padding:14px 16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">
+            Título *
+          </label>
+          <input type="text" name="titulo" placeholder="Ej: Parcial de Matemática I"
+                 style="width:100%;padding:8px 10px;border:1px solid #d0d4db;">
+        </div>
+        <div>
+          <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">
+            Tipo
+          </label>
+          <select name="tipo" style="width:100%;padding:8px 10px;border:1px solid #d0d4db;">
+            {% for val, lbl in tipos %}
+            <option value="{{ val }}">{{ lbl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">
+            Fecha (opcional)
+          </label>
+          <input type="date" name="fecha"
+                 style="width:100%;padding:8px 10px;border:1px solid #d0d4db;">
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:4px;">
+          Descripción (opcional)
+        </label>
+        <textarea name="descripcion" rows="2"
+                  placeholder="Notas adicionales..."
+                  style="width:100%;padding:8px 10px;border:1px solid #d0d4db;
+                         font-family:Arial,sans-serif;font-size:0.875rem;resize:vertical;"></textarea>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primario">Agregar a la agenda</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Lista de elementos -->
+<div class="bloque">
+  <div class="bloque-cabecera">Mis elementos ({{ items|length }})</div>
+  <div class="bloque-cuerpo">
+    {% if items %}
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        {% set tipo_lbl = {'recordatorio':'Recordatorio','materia_electiva':'Materia electiva','actividad':'Actividad'} %}
+        <tr>
+          <td><strong>{{ item.titulo }}</strong></td>
+          <td>
+            <span style="font-size:0.8rem;color:#5a6375;">
+              {{ tipo_lbl.get(item.tipo, item.tipo) }}
+            </span>
+          </td>
+          <td class="mono">{{ item.fecha.strftime('%d/%m/%Y') if item.fecha else '—' }}</td>
+          <td style="font-size:0.82rem;color:#5a6375;">
+            {{ item.descripcion or '—' }}
+          </td>
+          <td>
+            <form method="POST"
+                  action="{{ url_for('estudiante.agenda_eliminar', item_id=item.id) }}"
+                  onsubmit="return confirm('¿Eliminar este elemento de su agenda?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-peligro btn-sm">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="sin-datos">
+      Su agenda personal está vacía. Agregue recordatorios, materias electivas o
+      actividades académicas usando el formulario de arriba.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Separador visual: horario oficial -->
+<div class="bloque" style="margin-top:22px;">
+  <div class="bloque-cabecera">Acceso rápido — Horario Oficial</div>
+  <div class="bloque-cuerpo" style="padding:14px 16px;">
+    <p style="font-size:0.875rem;color:#5a6375;margin:0 0 10px;">
+      El horario oficial de sus materias es controlado por sus docentes.
+      Cualquier cambio que realicen se refleja aquí automáticamente.
+    </p>
+    <a href="{{ url_for('estudiante.horario') }}" class="btn btn-secundario">
+      Ver Horario Oficial
+    </a>
+  </div>
+</div>
+
+{% endblock %}

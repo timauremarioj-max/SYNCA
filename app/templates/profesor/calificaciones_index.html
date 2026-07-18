@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block titulo %}Calificaciones{% endblock %}
+{% block contenido %}
+
+<div class="migas"><a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo; Calificaciones</div>
+<div class="pagina-titulo">Calificaciones</div>
+
+<div class="bloque">
+  <div class="bloque-cabecera">Seleccione la sección para gestionar calificaciones</div>
+  <div class="bloque-cuerpo">
+    {% if secciones %}
+    <div class="lista-secciones">
+      {% for s in secciones %}
+      <div class="seccion-fila">
+        <div class="seccion-info">
+          <strong>{{ s.nombre_materia }}</strong> — Sección {{ s.nombre_seccion }}
+          <span>{{ s.dia_semana }} · {{ s.hora_inicio_fmt }} – {{ s.hora_fin_fmt }} · {{ s.inscripciones|length }} estudiante(s)</span>
+        </div>
+        <div class="seccion-acciones">
+          <a class="btn btn-primario btn-sm"
+             href="{{ url_for('profesor.notas', seccion_id=s.id) }}">
+            ≡ Ver / Subir notas
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="sin-datos">No tiene secciones asignadas. Contacte a la administración.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

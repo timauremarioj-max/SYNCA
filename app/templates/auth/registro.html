@@ -1,0 +1,177 @@
+{% extends 'base_auth.html' %}
+{% block titulo %}Registro{% endblock %}
+{% block contenido %}
+
+<div class="auth-logo-bloque">
+  <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SYNCA" class="auth-logo-img">
+  <div class="logo-nombre">SYNCA</div>
+  <div class="logo-subtitulo">Sistema Académico</div>
+</div>
+
+<div class="auth-tarjeta" style="max-width:430px;">
+  <div class="auth-titulo">Registro de usuario</div>
+
+  <form method="POST" action="{{ url_for('auth.registro') }}" novalidate id="form-registro">
+    {{ form.hidden_tag() }}
+
+    <div class="campo-grupo">
+      <label for="cedula">{{ form.cedula.label.text }}</label>
+      <input type="text" id="cedula" name="cedula"
+             placeholder="Ej: V-20123456"
+             value="{{ form.cedula.data or '' }}">
+      {% for e in form.cedula.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="nombre">{{ form.nombre.label.text }}</label>
+      <input type="text" id="nombre" name="nombre"
+             placeholder="Ingrese su nombre"
+             value="{{ form.nombre.data or '' }}">
+      {% for e in form.nombre.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="apellido">{{ form.apellido.label.text }}</label>
+      <input type="text" id="apellido" name="apellido"
+             placeholder="Ingrese su apellido"
+             value="{{ form.apellido.data or '' }}">
+      {% for e in form.apellido.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="correo">{{ form.correo.label.text }}</label>
+      <input type="text" id="correo" name="correo"
+             placeholder="nombre@correo.com"
+             value="{{ form.correo.data or '' }}">
+      {% for e in form.correo.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="contrasena">{{ form.contrasena.label.text }}</label>
+      <input type="password" id="contrasena" name="contrasena"
+             autocomplete="new-password">
+      {% for e in form.contrasena.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="contrasena2">{{ form.contrasena2.label.text }}</label>
+      <input type="password" id="contrasena2" name="contrasena2"
+             autocomplete="new-password">
+      {% for e in form.contrasena2.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="campo-grupo">
+      <label for="sel-rol">{{ form.rol.label.text }}</label>
+      <select name="rol" id="sel-rol" onchange="toggleAcademico()">
+        <option value="Estudiante" {{ 'selected' if form.rol.data == 'Estudiante' else '' }}>Estudiante</option>
+        <option value="Profesor"   {{ 'selected' if form.rol.data == 'Profesor'   else '' }}>Docente / Profesor</option>
+      </select>
+    </div>
+
+    <!-- Bloque solo para estudiantes -->
+    <div id="bloque-academico" style="border-top:1px solid #e0e3e8;margin-top:4px;padding-top:12px;">
+
+      <div class="campo-grupo">
+        <label for="sel-carrera">Carrera</label>
+        <select name="carrera" id="sel-carrera" onchange="actualizarSemestres()">
+          {% for val, lbl in form.carrera.choices %}
+          <option value="{{ val }}" {{ 'selected' if form.carrera.data == val else '' }}>{{ lbl }}</option>
+          {% endfor %}
+        </select>
+        {% for e in form.carrera.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="campo-grupo">
+        <label for="sel-semestre">Semestre</label>
+        <select name="semestre" id="sel-semestre">
+          <option value="">— Seleccione primero la carrera —</option>
+        </select>
+        <!-- Valor guardado del servidor para repoblar tras error -->
+        <input type="hidden" id="semestre-previo" value="{{ form.semestre.data or '' }}">
+        {% for e in form.semestre.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="campo-grupo">
+        <label for="nombre_seccion">
+          Sección <small style="color:#5a6375;">(ej: D-51, D1, A2)</small>
+        </label>
+        <input type="text" id="nombre_seccion" name="nombre_seccion"
+               placeholder="Ej: D1 o D2"
+               value="{{ form.nombre_seccion.data or '' }}"
+               style="text-transform:uppercase;">
+        <div style="font-size:0.76rem;color:#5a6375;margin-top:3px;">
+          Al registrarse quedará inscrito en las materias de esa sección.
+        </div>
+        {% for e in form.nombre_seccion.errors %}<div class="campo-error">{{ e }}</div>{% endfor %}
+      </div>
+
+    </div>
+
+    <button type="submit" class="btn-ingresar" id="btn-registro">Crear cuenta</button>
+  </form>
+
+  <div class="auth-registro">
+    ¿Ya tiene cuenta? <a href="{{ url_for('auth.login') }}">Iniciar sesión</a>
+  </div>
+</div>
+
+<script>
+var SEMESTRES_CARRERA = {
+  'Ingeniería de Sistemas':              8,
+  'Ingeniería de Telecomunicaciones':    8,
+  'Ingeniería Petroquímica':             8,
+  'Lic. en Administración de Desastres': 8,
+  'Lic. en Economía Social':             8,
+  'TSU en Turismo':                      4
+};
+
+var ETIQUETAS_SEM = [
+  '1er Semestre','2do Semestre','3er Semestre','4to Semestre',
+  '5to Semestre','6to Semestre','7mo Semestre','8vo Semestre'
+];
+
+function actualizarSemestres() {
+  var carrera     = document.getElementById('sel-carrera').value;
+  var selSem      = document.getElementById('sel-semestre');
+  var maxSem      = SEMESTRES_CARRERA[carrera] || 0;
+  var previo      = document.getElementById('semestre-previo').value;
+
+  selSem.innerHTML = '';
+
+  if (!carrera) {
+    selSem.innerHTML = '<option value="">— Seleccione primero la carrera —</option>';
+    return;
+  }
+
+  var optDef = document.createElement('option');
+  optDef.value = '';
+  optDef.text  = '— Seleccione —';
+  selSem.appendChild(optDef);
+
+  for (var i = 0; i < maxSem; i++) {
+    var opt = document.createElement('option');
+    opt.value = ETIQUETAS_SEM[i];
+    opt.text  = ETIQUETAS_SEM[i];
+    if (ETIQUETAS_SEM[i] === previo) opt.selected = true;
+    selSem.appendChild(opt);
+  }
+}
+
+function toggleAcademico() {
+  var rol    = document.getElementById('sel-rol').value;
+  var bloque = document.getElementById('bloque-academico');
+  bloque.style.display = (rol === 'Estudiante') ? 'block' : 'none';
+}
+
+// Evitar doble envío accidental
+document.getElementById('form-registro').addEventListener('submit', function() {
+  var btn = document.getElementById('btn-registro');
+  btn.disabled  = true;
+  btn.innerText = 'Procesando...';
+});
+
+// Inicializar al cargar
+toggleAcademico();
+actualizarSemestres();
+</script>
+{% endblock %}

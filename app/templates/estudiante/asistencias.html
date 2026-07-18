@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block titulo %}Mis asistencias{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Mis asistencias</div>
+
+{% set materias_riesgo = inscripciones | selectattr('pierde_materia') | list %}
+{% if materias_riesgo %}
+<div class="alerta-riesgo">
+  <strong>⚠ Riesgo académico</strong>
+  Tienes {{ materias_riesgo|length }} materia(s) con el 25 % o más de inasistencias injustificadas.
+</div>
+{% endif %}
+
+<div class="bloque">
+  <div class="bloque-cabecera">Control de inasistencias por materia</div>
+  <div class="bloque-cuerpo">
+    {% if inscripciones %}
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Sección</th>
+          <th class="centro">Clases</th>
+          <th class="centro">Presentes</th>
+          <th class="centro">Ausencias</th>
+          <th class="centro">Justificadas</th>
+          <th>% Inasistencia</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inscripciones %}
+        <tr>
+          <td><strong>{{ i.seccion.nombre_materia }}</strong></td>
+          <td class="mono">{{ i.seccion.nombre_seccion }}</td>
+          <td class="centro">{{ i.total_clases_registradas }}</td>
+          <td class="centro aprobado">{{ i.total_presentes }}</td>
+          <td class="centro {{ 'en-riesgo' if i.total_ausentes > 0 else '' }}">{{ i.total_ausentes }}</td>
+          <td class="centro">{{ i.total_justificados }}</td>
+          <td>
+            <div class="barra-prog">
+              <div class="barra-contenedor">
+                <div class="barra-relleno {{ 'riesgo' if i.pierde_materia else 'ok' }}"
+                     style="width:{{ [i.porcentaje_inasistencia,100]|min }}%;"></div>
+              </div>
+              <span class="{{ 'en-riesgo' if i.pierde_materia else '' }}">
+                {{ i.porcentaje_inasistencia }}%
+              </span>
+            </div>
+          </td>
+          <td>
+            {% if i.pierde_materia %}
+              <span class="insignia insignia-riesgo">En riesgo</span>
+            {% else %}
+              <span class="insignia insignia-ok">En regla</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="msg-info">
+      <span class="icono-i">ℹ</span>
+      Solo las ausencias injustificadas se computan para el límite del 25 %. Las justificadas no afectan el porcentaje.
+    </div>
+    {% else %}
+    <div class="sin-datos">No hay materias inscritas en el período actual.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

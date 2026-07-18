@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block titulo %}Detalle del estudiante{% endblock %}
+{% block contenido %}
+
+<div class="migas">
+  <a href="{{ url_for('profesor.estudiantes') }}">Estudiantes</a> &rsaquo;
+  {{ estudiante_u.nombre }} {{ estudiante_u.apellido }}
+</div>
+<div class="pagina-titulo">{{ estudiante_u.nombre }} {{ estudiante_u.apellido }}</div>
+
+<!-- Perfil académico -->
+<div class="bloque" style="margin-bottom:18px;">
+  <div class="bloque-cabecera">Datos académicos</div>
+  <div class="bloque-cuerpo" style="padding:0;">
+    <table class="tabla-sys">
+      <tbody>
+        <tr><td style="font-weight:700;width:180px;">Cédula</td><td class="mono">{{ estudiante_u.cedula }}</td></tr>
+        <tr><td style="font-weight:700;">Nombre completo</td><td>{{ estudiante_u.nombre }} {{ estudiante_u.apellido }}</td></tr>
+        <tr><td style="font-weight:700;">Correo</td><td>{{ estudiante_u.correo }}</td></tr>
+        <tr><td style="font-weight:700;">Carrera</td><td>{{ estudiante.carrera }}</td></tr>
+        <tr><td style="font-weight:700;">Semestre</td><td>{{ estudiante.semestre }}</td></tr>
+        <tr><td style="font-weight:700;">Sección</td><td class="mono">{{ estudiante.nombre_seccion }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Materias con este profesor -->
+<div class="bloque">
+  <div class="bloque-cabecera">Materias con usted — notas y asistencia</div>
+  <div class="bloque-cuerpo">
+    {% if inscripciones %}
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th class="centro">Corte I</th>
+          <th class="centro">Corte II</th>
+          <th class="centro">Corte III</th>
+          <th class="centro">Corte IV</th>
+          <th class="centro">Promedio</th>
+          <th class="centro">Clases</th>
+          <th class="centro">Ausencias</th>
+          <th class="centro">% Inasist.</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inscripciones %}
+        <tr>
+          <td><strong>{{ i.seccion.nombre_materia }}</strong></td>
+          <td class="centro">{{ i.nota.nota_1 if i.nota else '—' }}</td>
+          <td class="centro">{{ i.nota.nota_2 if i.nota else '—' }}</td>
+          <td class="centro">{{ i.nota.nota_3 if i.nota else '—' }}</td>
+          <td class="centro">{{ i.nota.nota_4 if i.nota else '—' }}</td>
+          <td class="centro">
+            <strong class="{{ 'aprobado' if i.nota and i.nota.promedio >= 10 else ('en-riesgo' if i.nota else '') }}">
+              {{ i.nota.promedio if i.nota else '—' }}
+            </strong>
+          </td>
+          <td class="centro">{{ i.total_clases_registradas }}</td>
+          <td class="centro">{{ i.total_ausentes }}</td>
+          <td class="centro">
+            <span class="{{ 'en-riesgo' if i.pierde_materia else '' }}">
+              {{ i.porcentaje_inasistencia }}%
+            </span>
+          </td>
+          <td style="display:flex;gap:6px;padding:8px 10px;">
+            <a class="btn btn-secundario btn-sm"
+               href="{{ url_for('profesor.asistencia', seccion_id=i.seccion_id) }}">
+              Asistencia
+            </a>
+            <a class="btn btn-primario btn-sm"
+               href="{{ url_for('profesor.notas', seccion_id=i.seccion_id) }}">
+              Notas
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="sin-datos">Este estudiante no tiene materias en sus secciones asignadas.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

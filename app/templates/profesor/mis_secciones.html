@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block titulo %}Mis secciones{% endblock %}
+{% block contenido %}
+
+<div class="migas">
+  <a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo; Mis secciones
+</div>
+<div class="pagina-titulo">Mis secciones</div>
+
+<!-- Formulario para agregar sección -->
+<div class="bloque" style="margin-bottom:24px;">
+  <div class="bloque-cabecera">Registrar nueva sección</div>
+  <div class="bloque-cuerpo" style="padding:20px;">
+    <p class="texto-suave" style="margin-bottom:16px;">
+      Escriba el nombre de la materia que dicta y seleccione la sección (D1 o D2).
+      El sistema buscará automáticamente a todos los estudiantes ya registrados
+      en esa sección e los inscribirá en su clase.
+    </p>
+    <form method="POST" action="{{ url_for('profesor.crear_seccion') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+
+        <div class="form-grupo" style="grid-column:1/-1;">
+          <label>Nombre de la materia *</label>
+          <input type="text" name="nombre_materia"
+                 placeholder="Ej: Programación I, Cálculo Diferencial, Turismo Sostenible..."
+                 required
+                 style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;
+                        border-radius:5px;font-size:0.95rem;">
+        </div>
+
+        <div class="form-grupo">
+          <label>Sección *</label>
+          <select name="nombre_seccion" required
+                  style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;border-radius:5px;">
+            <option value="">— Seleccione —</option>
+            {% for s in secciones_validas %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Aula *</label>
+          <input type="text" name="aula" placeholder="Ej: Lab-1, Aula-3" required
+                 style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;border-radius:5px;">
+        </div>
+
+        <div class="form-grupo">
+          <label>Día de clase *</label>
+          <select name="dia_semana" required
+                  style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;border-radius:5px;">
+            <option value="">— Seleccione —</option>
+            {% for d in dias %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Hora inicio *</label>
+          <input type="time" name="hora_inicio" required
+                 style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;border-radius:5px;">
+        </div>
+
+        <div class="form-grupo">
+          <label>Hora fin *</label>
+          <input type="time" name="hora_fin" required
+                 style="width:100%;padding:10px 12px;border:1.5px solid #d0d4db;border-radius:5px;">
+        </div>
+
+      </div>
+      <div style="margin-top:16px;">
+        <button type="submit" class="btn btn-primario">Crear sección</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Secciones actuales del profesor -->
+<div class="bloque">
+  <div class="bloque-cabecera">Secciones registradas ({{ secciones|length }})</div>
+  <div class="bloque-cuerpo">
+    {% if secciones %}
+    <div class="lista-secciones">
+      {% for s in secciones %}
+      <div class="seccion-fila">
+        <div class="seccion-info">
+          <strong>{{ s.nombre_materia }}</strong>
+          &nbsp;·&nbsp; Sección {{ s.nombre_seccion }}
+          <span>
+            {{ s.dia_semana }}
+            &nbsp;·&nbsp; {{ s.hora_inicio_fmt }} – {{ s.hora_fin_fmt }}
+            &nbsp;·&nbsp; Aula {{ s.aula }}
+            &nbsp;·&nbsp; <strong>{{ s.inscripciones|length }}</strong> estudiante(s)
+          </span>
+        </div>
+        <div class="seccion-acciones">
+          <a class="btn btn-secundario btn-sm"
+             href="{{ url_for('profesor.seccion_detalle', seccion_id=s.id) }}">
+            👥 Ver estudiantes
+          </a>
+          <a class="btn btn-secundario btn-sm"
+             href="{{ url_for('profesor.asistencia', seccion_id=s.id) }}">
+            ✓ Asistencia
+          </a>
+          <a class="btn btn-primario btn-sm"
+             href="{{ url_for('profesor.notas', seccion_id=s.id) }}">
+            ≡ Calificaciones
+          </a>
+          <form method="POST"
+                action="{{ url_for('profesor.eliminar_seccion', seccion_id=s.id) }}"
+                onsubmit="return confirm('¿Eliminar sección {{ s.nombre_materia }} — {{ s.nombre_seccion }}? Esto borrará notas y asistencias registradas.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-peligro btn-sm">Eliminar</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="sin-datos">
+      No ha registrado ninguna sección. Use el formulario de arriba para crear su primera clase.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

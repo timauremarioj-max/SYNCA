@@ -1,0 +1,53 @@
+{% extends 'base_auth.html' %}
+{% block titulo %}Iniciar sesión{% endblock %}
+{% block contenido %}
+
+<!-- Logo -->
+<div class="auth-logo-bloque">
+  <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SYNCA" class="auth-logo-img">
+  <div class="logo-nombre">SYNCA</div>
+  <div class="logo-subtitulo">Sistema Académico</div>
+</div>
+
+<!-- Tarjeta de login -->
+<div class="auth-tarjeta">
+  <div class="auth-titulo">Iniciar sesión</div>
+  <form method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="campo-grupo">
+      <label for="cedula">Cédula de identidad</label>
+      <input type="text" id="cedula" name="cedula"
+             placeholder="Ingrese su cédula"
+             value="{{ form.cedula.data or '' }}"
+             autocomplete="username">
+      {% for e in form.cedula.errors %}
+      <div style="color:var(--rojo);font-size:0.78rem;margin-top:3px;">{{ e }}</div>
+      {% endfor %}
+    </div>
+    <div class="campo-grupo">
+      <label for="contrasena">Contraseña</label>
+      <div class="campo-password">
+        <input type="password" id="contrasena" name="contrasena"
+               placeholder="Ingrese su contraseña"
+               autocomplete="current-password">
+        <button type="button" class="ojo" onclick="togglePass()">&#128065;</button>
+      </div>
+      {% for e in form.contrasena.errors %}
+      <div style="color:var(--rojo);font-size:0.78rem;margin-top:3px;">{{ e }}</div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn-ingresar">Ingresar</button>
+  </form>
+  <a class="auth-link" href="{{ url_for('auth.recuperar') }}">¿Olvidó su contraseña?</a>
+  <div class="auth-registro">
+    ¿No tiene cuenta? <a href="{{ url_for('auth.registro') }}">Regístrese aquí</a>
+  </div>
+</div>
+
+<script>
+function togglePass() {
+  var c = document.getElementById('contrasena');
+  c.type = c.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

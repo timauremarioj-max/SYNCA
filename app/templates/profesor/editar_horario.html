@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar horario{% endblock %}
+{% block contenido %}
+
+<div class="migas">
+  <a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo;
+  Editar horario — {{ seccion.nombre_materia }} (Sección {{ seccion.nombre_seccion }})
+</div>
+<div class="pagina-titulo">
+  Editar horario — {{ seccion.nombre_materia }}
+</div>
+
+<div class="bloque" style="max-width:480px;">
+  <div class="bloque-cabecera">Datos actuales de la sección</div>
+  <form method="POST">
+    <div style="padding-top:14px;">
+      <div class="form-grupo">
+        <label>Día de la semana</label>
+        <select name="dia_semana">
+          {% for d in dias %}
+          <option value="{{ d }}" {{ 'selected' if seccion.dia_semana == d }}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-fila">
+        <div class="form-grupo">
+          <label>Hora de inicio</label>
+          <input type="time" name="hora_inicio"
+                 value="{{ seccion.hora_inicio.strftime('%H:%M') if seccion.hora_inicio else '' }}">
+        </div>
+        <div class="form-grupo">
+          <label>Hora de fin</label>
+          <input type="time" name="hora_fin"
+                 value="{{ seccion.hora_fin.strftime('%H:%M') if seccion.hora_fin else '' }}">
+        </div>
+      </div>
+      <div class="form-grupo">
+        <label>Aula</label>
+        <input type="text" name="aula" value="{{ seccion.aula }}"
+               placeholder="Ej: Aula-3 / Lab-1">
+      </div>
+    </div>
+    <div class="barra-acciones">
+      <a href="{{ url_for('profesor.panel') }}" class="btn btn-secundario">Cancelar</a>
+      <button type="submit" class="btn btn-primario">Guardar cambios</button>
+    </div>
+  </form>
+  <div class="msg-info" style="margin:0 0 14px 14px; margin-right:14px;">
+    <span class="icono-i">ℹ</span>
+    Los estudiantes verán el horario actualizado de forma inmediata.
+  </div>
+</div>
+
+{% endblock %}

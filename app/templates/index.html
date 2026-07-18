@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SYNCA · UNEFA</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .inicio-pagina {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--fondo);
+    }
+    .inicio-bloque {
+      text-align: center;
+      padding: 40px;
+    }
+    .inicio-inst {
+      font-size: 0.75rem;
+      color: var(--suave);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      line-height: 1.8;
+    }
+    .inicio-nombre {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--azul);
+      letter-spacing: 4px;
+      margin: 10px 0 4px;
+    }
+    .inicio-subtitulo {
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      color: var(--suave);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+    .inicio-btn {
+      display: inline-block;
+      background: var(--azul);
+      color: #fff;
+      padding: 12px 36px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+    .inicio-btn:hover { background: var(--azul-oscuro); text-decoration: none; }
+    .inicio-logo-img { height: 80px; width: auto; max-width: 100%; display: block; margin: 0 auto; }
+    @media (max-width: 480px) {
+      .inicio-bloque { padding: 24px 16px; }
+      .inicio-nombre { font-size: 1.7rem; letter-spacing: 2px; }
+      .inicio-logo-img { height: 64px; }
+    }
+  </style>
+</head>
+<body>
+<div class="inicio-pagina">
+  <div class="inicio-bloque">
+    <div class="inicio-inst">
+      República Bolivariana de Venezuela<br>
+      Universidad Nacional Experimental Politécnica<br>
+      de la Fuerza Armada Nacional Bolivariana<br>
+      <strong>UNEFA · Núcleo Falcón</strong>
+    </div>
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SYNCA" class="inicio-logo-img">
+    <div class="inicio-nombre">SYNCA</div>
+    <div class="inicio-subtitulo">Sistema Inteligente de Notas, Control y Asistencia</div>
+    <a href="{{ url_for('auth.login') }}" class="inicio-btn">Acceder al sistema</a>
+  </div>
+</div>
+<footer class="footer footer-auth">
+  &copy; 2025 UNEFA Núcleo Falcón &ndash; SYNCA. Todos los derechos reservados.
+</footer>
+</body>
+</html>

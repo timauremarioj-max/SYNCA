@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block titulo %}Panel del Docente{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Panel del Docente</div>
+
+<!-- Resumen -->
+<div class="stats-fila" style="margin-bottom:22px;">
+  <div class="stat-caja">
+    <div class="etiqueta">Docente</div>
+    <div class="valor" style="font-size:0.95rem;padding-top:6px;">
+      {{ current_user.nombre }} {{ current_user.apellido }}
+    </div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Especialidad</div>
+    <div class="valor" style="font-size:0.95rem;padding-top:6px;">{{ profesor.especialidad }}</div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Secciones activas</div>
+    <div class="valor">{{ secciones|length }}</div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Estudiantes a cargo</div>
+    <div class="valor">{{ total_estudiantes }}</div>
+  </div>
+</div>
+
+<!-- Secciones vinculadas -->
+<div class="bloque">
+  <div class="bloque-cabecera" style="display:flex;justify-content:space-between;align-items:center;">
+    <span>Mis secciones</span>
+    <a href="{{ url_for('profesor.mis_secciones') }}" class="btn btn-secundario btn-sm">
+      + Vincular sección
+    </a>
+  </div>
+  <div class="bloque-cuerpo">
+    {% if secciones %}
+    <div class="lista-secciones">
+      {% for s in secciones %}
+      <div class="seccion-fila">
+        <div class="seccion-info">
+          <strong>{{ s.nombre_materia }}</strong>
+          &nbsp;·&nbsp; Sección {{ s.nombre_seccion }}
+          <span>
+            {{ s.dia_semana }}
+            &nbsp;·&nbsp; {{ s.hora_inicio_fmt }} – {{ s.hora_fin_fmt }}
+            &nbsp;·&nbsp; Aula {{ s.aula }}
+            &nbsp;·&nbsp;
+            <strong>{{ s.inscripciones|length }}</strong> estudiante(s) inscritos
+          </span>
+        </div>
+        <div class="seccion-acciones">
+          <a class="btn btn-secundario btn-sm"
+             href="{{ url_for('profesor.seccion_detalle', seccion_id=s.id) }}">
+            👥 Ver estudiantes
+          </a>
+          <a class="btn btn-secundario btn-sm"
+             href="{{ url_for('profesor.asistencia', seccion_id=s.id) }}">
+            ✓ Asistencia
+          </a>
+          <a class="btn btn-primario btn-sm"
+             href="{{ url_for('profesor.notas', seccion_id=s.id) }}">
+            ≡ Calificaciones
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="sin-datos">
+      No tiene secciones vinculadas.
+      <a href="{{ url_for('profesor.mis_secciones') }}"
+         style="color:#1B3A6B;font-weight:700;">
+        Busque y vincule su sección aquí.
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

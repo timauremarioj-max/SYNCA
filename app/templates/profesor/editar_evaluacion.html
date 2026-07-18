@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block titulo %}Editar evaluación{% endblock %}
+{% block contenido %}
+
+<style>
+.campo-porcentaje {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.campo-porcentaje input {
+  width: 100%;
+  padding: 9px 28px 9px 11px;
+  border: 1.5px solid #d0d4db;
+  border-radius: 5px;
+  font-size: 0.93rem;
+  font-family: inherit;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.campo-porcentaje input::-webkit-outer-spin-button,
+.campo-porcentaje input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.campo-porcentaje span {
+  position: absolute;
+  right: 10px;
+  color: #9aa0ad;
+  font-size: 0.88rem;
+  pointer-events: none;
+  user-select: none;
+}
+.campo-nota-edit input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1.5px solid #d0d4db;
+  border-radius: 5px;
+  font-size: 0.93rem;
+  font-family: inherit;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.campo-nota-edit input::-webkit-outer-spin-button,
+.campo-nota-edit input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>
+
+{% set nombres_corte = {1: 'Primer Corte', 2: 'Segundo Corte', 3: 'Tercer Corte', 4: 'Cuarto Corte'} %}
+
+<div class="migas">
+  <a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo;
+  <a href="{{ url_for('profesor.notas', seccion_id=ev.inscripcion.seccion_id) }}">Calificaciones</a>
+  &rsaquo; Editar evaluación
+</div>
+<div class="pagina-titulo">Editar evaluación</div>
+
+<div class="bloque" style="max-width:480px;">
+  <div class="bloque-cuerpo" style="padding:20px;">
+
+    <p class="texto-suave" style="margin-bottom:16px;">
+      <strong>Estudiante:</strong>
+      {{ ev.inscripcion.estudiante.usuario.nombre }}
+      {{ ev.inscripcion.estudiante.usuario.apellido }}
+      &nbsp;·&nbsp;
+      <strong>{{ nombres_corte[ev.corte] }}</strong>
+    </p>
+
+    <form method="POST"
+          onsubmit="return validarEdicion(this, {{ cortes[ev.corte]|int }})">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-grupo">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:5px;">
+          Nombre de la evaluación *
+        </label>
+        <input type="text" name="nombre" value="{{ ev.nombre }}" required
+               style="width:100%;padding:9px 11px;border:1.5px solid #d0d4db;
+                      border-radius:5px;font-size:0.93rem;font-family:inherit;">
+      </div>
+
+      <div class="form-grupo">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:5px;">
+          Porcentaje *
+          <span style="font-weight:400;color:#5a6375;">
+            (máx {{ cortes[ev.corte]|int }}% por corte)
+          </span>
+        </label>
+        <div class="campo-porcentaje">
+          <input type="number" name="porcentaje"
+                 value="{{ ev.porcentaje|int }}"
+                 min="1" max="{{ cortes[ev.corte]|int }}"
+                 step="1" required>
+          <span>%</span>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:5px;">
+          Nota obtenida * <span style="font-weight:400;color:#5a6375;">(0 – 20)</span>
+        </label>
+        <div class="campo-nota-edit">
+          <input type="number" name="nota_obtenida"
+                 value="{{ ev.nota_obtenida|int }}"
+                 min="0" max="20" step="1" required>
+        </div>
+      </div>
+
+      <p class="texto-suave" style="font-size:0.82rem;margin-bottom:16px;">
+        Aporte actual: <strong>{{ "%.2f"|format(ev.aporte|float) }}%</strong>
+        — se recalculará automáticamente al guardar.
+      </p>
+
+      <div class="barra-acciones">
+        <a href="{{ url_for('profesor.notas', seccion_id=ev.inscripcion.seccion_id) }}"
+           class="btn btn-secundario">Cancelar</a>
+        <button type="submit" class="btn btn-primario">Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function validarEdicion(form, maxCorte) {
+  var porc = parseInt(form.porcentaje.value, 10);
+  var nota = parseInt(form.nota_obtenida.value, 10);
+  var nombre = form.nombre.value.trim();
+
+  if (!nombre) {
+    alert('El nombre de la evaluación no puede estar vacío.');
+    return false;
+  }
+  if (isNaN(porc) || String(porc) !== form.porcentaje.value.trim()) {
+    alert('El porcentaje debe ser un número entero (sin decimales).');
+    form.porcentaje.focus();
+    return false;
+  }
+  if (porc < 1 || porc > maxCorte) {
+    alert('El porcentaje debe ser entre 1 y ' + maxCorte + '%.');
+    form.porcentaje.focus();
+    return false;
+  }
+  if (isNaN(nota) || nota < 0 || nota > 20) {
+    alert('La nota debe ser un número entero entre 0 y 20.');
+    form.nota_obtenida.focus();
+    return false;
+  }
+  return true;
+}
+</script>
+
+{% endblock %}

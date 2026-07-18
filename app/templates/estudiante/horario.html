@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block titulo %}Mi horario{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Mi horario</div>
+
+<!-- ── Horario oficial (secciones del profesor) ─────────────────────────── -->
+<div class="bloque" style="margin-bottom:24px;">
+  <div class="bloque-cabecera">Horario oficial de clases</div>
+  <div class="bloque-cuerpo" style="padding:14px;">
+    <div class="grilla-horario">
+      {% for dia in dias %}
+      <div class="col-dia">
+        <div class="dia-cab">{{ dia }}</div>
+        {% if grilla[dia] %}
+          {% for s in grilla[dia] %}
+          <div class="clase-bloque">
+            <div class="clase-hora">
+              {{ s.hora_inicio_fmt }} – {{ s.hora_fin_fmt }}
+            </div>
+            <div class="clase-nombre">{{ s.nombre_materia }}</div>
+            <div class="clase-detalle">Aula {{ s.aula }} · Secc. {{ s.nombre_seccion }}</div>
+            <div class="clase-detalle">{% if s.profesor %}Prof. {{ s.profesor.usuario.apellido }}{% else %}Sin docente asignado{% endif %}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="sin-clases">—</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <p class="texto-suave" style="margin-top:8px;">
+      Los cambios del docente se reflejan aquí automáticamente.
+    </p>
+  </div>
+</div>
+
+<!-- ── Horario personal editable ───────────────────────────────────────── -->
+<div class="bloque">
+  <div class="bloque-cabecera">Mi horario personal</div>
+  <div class="bloque-cuerpo" style="padding:18px;">
+
+    <!-- Formulario para agregar -->
+    <form method="POST" action="{{ url_for('estudiante.horario_agregar') }}" style="margin-bottom:22px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-grupo">
+          <label>Materia *</label>
+          <input type="text" name="materia" placeholder="Ej: Cálculo I" required>
+        </div>
+        <div class="form-grupo">
+          <label>Día *</label>
+          <select name="dia_semana" required>
+            <option value="">— Seleccione —</option>
+            {% for d in dias %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label>Hora inicio *</label>
+          <input type="time" name="hora_inicio" required>
+        </div>
+        <div class="form-grupo">
+          <label>Hora fin *</label>
+          <input type="time" name="hora_fin" required>
+        </div>
+        <div class="form-grupo">
+          <label>Sección</label>
+          <select name="seccion">
+            <option value="">— Opcional —</option>
+            <option value="D1">D1</option>
+            <option value="D2">D2</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label>Aula</label>
+          <input type="text" name="aula" placeholder="Ej: Lab-1">
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <button type="submit" class="btn btn-primario">+ Agregar al horario</button>
+      </div>
+    </form>
+
+    <!-- Tabla de entradas personales -->
+    {% if entradas_personales %}
+    <table class="tabla-base" style="width:100%;">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Día</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Sección</th>
+          <th>Aula</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in entradas_personales %}
+        <tr>
+          <td>{{ e.materia }}</td>
+          <td>{{ e.dia_semana }}</td>
+          <td>{{ e.hora_inicio }}</td>
+          <td>{{ e.hora_fin }}</td>
+          <td>{{ e.seccion or '—' }}</td>
+          <td>{{ e.aula or '—' }}</td>
+          <td>
+            <form method="POST"
+                  action="{{ url_for('estudiante.horario_eliminar', entrada_id=e.id) }}"
+                  onsubmit="return confirm('¿Eliminar esta clase del horario?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-peligro" style="padding:3px 10px;font-size:0.8rem;">
+                Eliminar
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="texto-suave">No ha agregado ninguna clase a su horario personal todavía.</p>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

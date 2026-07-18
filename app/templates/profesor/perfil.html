@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block titulo %}Mi perfil{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Mi perfil</div>
+
+<div class="perfil-bloque">
+  <div class="perfil-campo">
+    <span class="etiqueta">Nombre completo</span>
+    <span class="valor">{{ current_user.nombre }} {{ current_user.apellido }}</span>
+  </div>
+  <div class="perfil-campo">
+    <span class="etiqueta">Cédula de identidad</span>
+    <span class="valor">{{ current_user.cedula }}</span>
+  </div>
+  <div class="perfil-campo">
+    <span class="etiqueta">Correo electrónico</span>
+    <span class="valor">{{ current_user.correo }}</span>
+  </div>
+  <div class="perfil-campo">
+    <span class="etiqueta">Rol</span>
+    <span class="valor">{{ current_user.rol }}</span>
+  </div>
+  <div class="perfil-campo">
+    <span class="etiqueta">Especialidad</span>
+    <span class="valor">{{ profesor.especialidad }}</span>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}SYNCA{% endblock %} · UNEFA</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="auth-pagina">
+
+  <!-- Mensajes flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-lista">
+      {% for cat, msg in messages %}
+      <div class="flash-item flash-{{ cat }}">
+        {% if cat == 'danger' %}&#9888; {% elif cat == 'success' %}&#10003; {% elif cat == 'info' %}&#8505; {% elif cat == 'warning' %}&#9888; {% endif %}{{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block contenido %}{% endblock %}
+
+</div>
+<footer class="footer footer-auth">
+  &copy; 2025 UNEFA Núcleo Falcón &ndash; SYNCA. Todos los derechos reservados.
+</footer>
+</body>
+</html>

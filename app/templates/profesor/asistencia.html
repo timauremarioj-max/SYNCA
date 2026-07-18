@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block titulo %}Tomar asistencia{% endblock %}
+{% block contenido %}
+
+<div class="migas">
+  <a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo;
+  Tomar asistencia — {{ seccion.nombre_materia }} (Sección {{ seccion.nombre_seccion }})
+</div>
+
+<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+  <div class="pagina-titulo" style="margin-bottom:0;">
+    Tomar asistencia — {{ seccion.nombre_materia }} (Sección {{ seccion.nombre_seccion }})
+  </div>
+  <span style="color:#1B3A6B; font-weight:700; font-size:0.88rem;">
+    Fecha: {{ hoy.strftime('%d/%m/%Y') }}
+  </span>
+</div>
+
+{% if ya_registrada %}
+<div class="flash-item flash-info" style="margin-bottom:14px;">
+  La asistencia de hoy ya fue registrada para esta sección.
+</div>
+{% endif %}
+
+<div class="bloque">
+  {% if not ya_registrada %}
+  <div class="barra-masiva">
+    <span class="etiqueta-masiva">Marcar todos:</span>
+    <button type="button" onclick="marcarTodos('Presente')">Marcar todos presentes</button>
+    <button type="button" onclick="marcarTodos('Ausente')">Marcar todos ausentes</button>
+    <button type="button" onclick="marcarTodos('Justificado')">Marcar todos justificados</button>
+  </div>
+  {% endif %}
+
+  {% if inscripciones %}
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th class="centro">#</th>
+          <th>Cédula</th>
+          <th>Estudiante</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inscripciones %}
+        <tr>
+          <td class="centro mono">{{ loop.index }}</td>
+          <td class="mono">{{ i.estudiante.usuario.cedula }}</td>
+          <td>{{ i.estudiante.usuario.nombre }} {{ i.estudiante.usuario.apellido }}</td>
+          <td>
+            {% if ya_registrada %}
+              {% set estado = asistencias_hoy.get(i.id) %}
+              {% if estado == 'Presente' %}
+                <span class="insignia insignia-ok">Presente</span>
+              {% elif estado == 'Justificado' %}
+                <span style="color:#7a5500; font-size:0.82rem; font-weight:600;">Justificado</span>
+              {% else %}
+                <span class="insignia insignia-riesgo">Ausente</span>
+              {% endif %}
+            {% else %}
+              <select name="estado_{{ i.id }}" class="select-estado">
+                <option value="Presente">Presente</option>
+                <option value="Ausente" selected>Ausente</option>
+                <option value="Justificado">Justificado</option>
+              </select>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if not ya_registrada %}
+    <div class="barra-acciones">
+      <a href="{{ url_for('profesor.panel') }}" class="btn btn-secundario">Cancelar</a>
+      <button type="submit" class="btn btn-primario">Guardar asistencia</button>
+    </div>
+    {% endif %}
+  </form>
+  {% else %}
+  <div class="sin-datos">Esta sección no tiene estudiantes inscritos.</div>
+  {% endif %}
+</div>
+
+{% if not ya_registrada %}
+<script>
+function marcarTodos(v) {
+  document.querySelectorAll('select.select-estado').forEach(s => s.value = v);
+}
+</script>
+{% endif %}
+{% endblock %}

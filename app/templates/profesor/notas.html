@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block titulo %}Calificaciones — {{ seccion.nombre_materia }}{% endblock %}
+{% block contenido %}
+
+<style>
+.campo-porcentaje { position:relative; display:flex; align-items:center; }
+.campo-porcentaje input {
+  width:100%; padding:7px 28px 7px 10px;
+  border:1.5px solid #d0d4db; border-radius:4px;
+  font-size:0.88rem; font-family:inherit;
+  -moz-appearance:textfield; appearance:textfield;
+}
+.campo-porcentaje input::-webkit-outer-spin-button,
+.campo-porcentaje input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.campo-porcentaje span { position:absolute; right:9px; color:#9aa0ad; font-size:0.85rem; pointer-events:none; }
+.sin-spinner { -moz-appearance:textfield; appearance:textfield; }
+.sin-spinner::-webkit-outer-spin-button,
+.sin-spinner::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.form-eval-grid { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:10px; align-items:flex-end; }
+.campo-label { display:block; font-size:0.78rem; font-weight:700; margin-bottom:4px; color:#2a3145; }
+.campo-label .disponible { font-weight:400; color:#5a6375; }
+.badge-aprobado { background:#d4edda; color:#155724; padding:2px 10px; border-radius:12px; font-size:0.8rem; font-weight:700; }
+.badge-reprobado { background:#f8d7da; color:#721c24; padding:2px 10px; border-radius:12px; font-size:0.8rem; font-weight:700; }
+.badge-parcial { background:#fff3cd; color:#856404; padding:2px 10px; border-radius:12px; font-size:0.8rem; font-weight:700; }
+.resumen-corte { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.barra-corte-wrap { height:6px; background:#e9ecef; border-radius:3px; margin-bottom:10px; }
+.barra-corte-fill { height:6px; background:#1B3A6B; border-radius:3px; transition:width .3s; }
+</style>
+
+<div class="migas">
+  <a href="{{ url_for('profesor.panel') }}">Inicio</a> &rsaquo;
+  <a href="{{ url_for('profesor.seccion_detalle', seccion_id=seccion.id) }}">
+    {{ seccion.nombre_materia }} ({{ seccion.nombre_seccion }})
+  </a> &rsaquo; Calificaciones
+</div>
+<div class="pagina-titulo">
+  Calificaciones — {{ seccion.nombre_materia }} · Sección {{ seccion.nombre_seccion }}
+</div>
+
+{% set nombres_corte = {1: 'Primer Corte', 2: 'Segundo Corte', 3: 'Tercer Corte', 4: 'Cuarto Corte'} %}
+
+{% if not inscripciones %}
+<div class="bloque"><div class="sin-datos">Esta sección no tiene estudiantes inscritos.</div></div>
+{% else %}
+
+{% for i in inscripciones %}
+
+{# ── Calcular totales por corte y nota final ── #}
+{% set c1 = evals_map[i.id][1]['acumulado']|float %}
+{% set c2 = evals_map[i.id][2]['acumulado']|float %}
+{% set c3 = evals_map[i.id][3]['acumulado']|float %}
+{% set c4 = evals_map[i.id][4]['acumulado']|float %}
+{% set nota_final = c1 + c2 + c3 + c4 %}
+
+<div class="bloque" style="margin-bottom:22px;">
+
+  {# Cabecera del estudiante #}
+  <div class="bloque-cabecera" style="display:flex;justify-content:space-between;align-items:center;">
+    <span>
+      {{ i.estudiante.usuario.apellido }}, {{ i.estudiante.usuario.nombre }}
+      <span class="mono" style="font-size:0.81rem;color:#5a6375;margin-left:8px;">{{ i.estudiante.usuario.cedula }}</span>
+    </span>
+    <span style="display:flex;align-items:center;gap:10px;">
+      <span class="texto-suave" style="font-size:0.85rem;">
+        Nota final: <strong style="color:#1B3A6B;font-size:1rem;">{{ "%.2f"|format(nota_final) }} / 20</strong>
+      </span>
+      {% if nota_final >= 10 %}
+        <span class="badge-aprobado">Aprobado</span>
+      {% elif nota_final > 0 %}
+        <span class="badge-parcial">En curso</span>
+      {% else %}
+        <span class="badge-parcial">Sin evaluar</span>
+      {% endif %}
+    </span>
+  </div>
+
+  {# Resumen de los 4 cortes #}
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:#f7f9fc;border-bottom:1px solid #e0e3e8;">
+    {% for c in range(1,5) %}
+    {% set pts = evals_map[i.id][c]['acumulado']|float %}
+    <div style="text-align:center;padding:8px;background:#fff;border-radius:5px;border:1px solid #e0e3e8;">
+      <div style="font-size:0.75rem;color:#5a6375;margin-bottom:2px;">{{ nombres_corte[c] }}</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#1B3A6B;">{{ "%.2f"|format(pts) }}</div>
+      <div style="font-size:0.72rem;color:#9aa0ad;">/ 5.00 pts</div>
+      <div class="barra-corte-wrap" style="margin-top:5px;">
+        <div class="barra-corte-fill" style="width:{{ [pts / 5 * 100, 100]|min|int }}%;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="bloque-cuerpo" style="padding:0;">
+
+    {% for c in range(1, 5) %}
+    {% set d = evals_map[i.id][c] %}
+
+    <div style="border-top:1px solid #eaedf2;padding:14px 16px;">
+
+      <div class="resumen-corte">
+        <strong style="font-size:0.92rem;color:#1B3A6B;">{{ nombres_corte[c] }} (máx 5.00 pts)</strong>
+        <span class="texto-suave" style="font-size:0.82rem;">
+          Porcentaje asignado: <strong>{{ "%.0f"|format(d['usado']) }}%</strong>
+          &nbsp;|&nbsp; Disponible: <strong>{{ "%.0f"|format(d['restante']) }}%</strong>
+          &nbsp;|&nbsp; Acumulado: <strong style="color:#1e7e34;">{{ "%.2f"|format(d['acumulado']|float) }} pts</strong>
+        </span>
+      </div>
+
+      {% if d['evaluaciones'] %}
+      <table class="tabla-sys" style="margin-bottom:10px;font-size:0.85rem;">
+        <thead>
+          <tr>
+            <th>Evaluación</th>
+            <th class="centro">Porcentaje</th>
+            <th class="centro">Nota (0–20)</th>
+            <th class="centro">Puntos obtenidos</th>
+            <th class="centro">Fecha</th>
+            <th class="centro">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in d['evaluaciones'] %}
+          {% set pts_ev = ev.aporte|float %}
+          <tr>
+            <td>{{ ev.nombre }}</td>
+            <td class="centro">{{ ev.porcentaje|int }}%</td>
+            <td class="centro">{{ ev.nota_obtenida }}</td>
+            <td class="centro">
+              <strong>{{ "%.2f"|format(pts_ev) }}</strong>
+              <span class="texto-suave" style="font-size:0.76rem;">pts</span>
+            </td>
+            <td class="centro mono" style="font-size:0.78rem;">
+              {{ ev.fecha_registro.strftime('%d/%m/%Y') if ev.fecha_registro else '—' }}
+            </td>
+            <td class="centro">
+              <a href="{{ url_for('profesor.editar_evaluacion', ev_id=ev.id) }}"
+                 class="btn btn-secundario btn-sm" style="padding:2px 9px;font-size:0.78rem;">Editar</a>
+              <form method="POST"
+                    action="{{ url_for('profesor.eliminar_evaluacion', ev_id=ev.id) }}"
+                    style="display:inline;"
+                    onsubmit="return confirm('¿Eliminar {{ ev.nombre }}?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-peligro btn-sm"
+                        style="padding:2px 9px;font-size:0.78rem;">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="texto-suave" style="font-size:0.83rem;margin-bottom:8px;">Sin evaluaciones en este corte.</p>
+      {% endif %}
+
+      {% if d['restante'] > 0 %}
+      <details>
+        <summary class="btn btn-secundario btn-sm"
+                 style="cursor:pointer;display:inline-block;padding:5px 14px;font-size:0.82rem;list-style:none;">
+          + Agregar evaluación al {{ nombres_corte[c] }}
+        </summary>
+        <div style="background:#f7f9fc;border:1px solid #e0e3e8;border-radius:5px;padding:14px;margin-top:8px;">
+          <form method="POST"
+                action="{{ url_for('profesor.agregar_evaluacion', seccion_id=seccion.id) }}"
+                onsubmit="return validarFormEval(this, {{ d['restante']|int }})">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="inscripcion_id" value="{{ i.id }}">
+            <input type="hidden" name="corte" value="{{ c }}">
+            <div class="form-eval-grid">
+              <div>
+                <label class="campo-label">Nombre de la evaluación *</label>
+                <input type="text" name="nombre" placeholder="Ej: Parcial I, Taller, Quiz..." autocomplete="off" required
+                       style="width:100%;padding:7px 10px;border:1.5px solid #d0d4db;border-radius:4px;font-size:0.88rem;font-family:inherit;">
+              </div>
+              <div>
+                <label class="campo-label">
+                  Porcentaje * <span class="disponible">(máx {{ d['restante']|int }}%)</span>
+                </label>
+                <div class="campo-porcentaje">
+                  <input type="number" name="porcentaje"
+                         min="1" max="{{ d['restante']|int }}" step="1"
+                         placeholder="Ej: 10" autocomplete="off" required>
+                  <span>%</span>
+                </div>
+              </div>
+              <div>
+                <label class="campo-label">Nota obtenida * <span class="disponible">(0–20)</span></label>
+                <input type="number" name="nota_obtenida" min="0" max="20" step="1"
+                       placeholder="Ej: 15" autocomplete="off" required
+                       class="sin-spinner"
+                       style="width:100%;padding:7px 10px;border:1.5px solid #d0d4db;border-radius:4px;font-size:0.88rem;font-family:inherit;">
+              </div>
+              <div>
+                <button type="submit" class="btn btn-primario" style="padding:7px 18px;font-size:0.88rem;white-space:nowrap;">
+                  Guardar
+                </button>
+              </div>
+            </div>
+            <p class="texto-suave" style="font-size:0.76rem;margin-top:8px;">
+              Puntos obtenidos = (nota × porcentaje) ÷ 100
+            </p>
+          </form>
+        </div>
+      </details>
+      {% else %}
+      <p class="texto-suave" style="font-size:0.8rem;margin-top:4px;">✔ Corte completo.</p>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<script>
+function validarFormEval(form, disponible) {
+  var nombre = form.nombre.value.trim();
+  var porc   = parseInt(form.porcentaje.value, 10);
+  var nota   = parseInt(form.nota_obtenida.value, 10);
+  if (!nombre) { alert('El nombre de la evaluación es obligatorio.'); return false; }
+  if (isNaN(porc) || porc < 1) { alert('El porcentaje debe ser un número entero mayor que 0.'); form.porcentaje.focus(); return false; }
+  if (porc > disponible) { alert('El porcentaje excede el disponible para este corte.\nMáximo disponible: ' + disponible + '%.'); form.porcentaje.focus(); return false; }
+  if (isNaN(nota) || nota < 0 || nota > 20) { alert('La nota debe ser un número entero entre 0 y 20.'); form.nota_obtenida.focus(); return false; }
+  return true;
+}
+</script>
+
+{% endblock %}

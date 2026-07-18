@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+
+<div class="pagina-titulo">Inicio</div>
+
+{% if materias_en_riesgo %}
+<div class="alerta-riesgo">
+  <strong>⚠ Riesgo académico por inasistencias</strong>
+  Tienes {{ materias_en_riesgo|length }} materia(s) con el 25 % o más de inasistencias injustificadas.
+  Consulta el módulo <a href="{{ url_for('estudiante.asistencias') }}">Mis asistencias</a>.
+</div>
+{% endif %}
+
+<!-- Stats fila (igual que la imagen de referencia) -->
+<div class="stats-fila">
+  <div class="stat-caja">
+    <div class="etiqueta">Materias inscritas</div>
+    <div class="valor">{{ total_materias }}</div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Promedio general</div>
+    <div class="valor {{ 'verde' if promedio_general >= 10 else 'rojo' }}">{{ promedio_general }}</div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Inasistencias</div>
+    <div class="valor {{ 'rojo' if materias_en_riesgo else '' }}">{{ total_ausencias }}</div>
+  </div>
+  <div class="stat-caja">
+    <div class="etiqueta">Estado</div>
+    <div class="valor {{ 'rojo' if materias_en_riesgo else 'verde' }}">
+      {{ 'En riesgo' if materias_en_riesgo else 'Activo' }}
+    </div>
+  </div>
+</div>
+
+<!-- Resumen por materia (tabla exacta como en la imagen) -->
+<div class="bloque">
+  <div class="bloque-cabecera">Resumen por materia</div>
+  <div class="bloque-cuerpo">
+    {% if inscripciones %}
+    <table class="tabla-sys">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Profesor</th>
+          <th>Promedio</th>
+          <th>Inasistencias</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inscripciones %}
+        <tr>
+          <td>{{ i.seccion.nombre_materia }}</td>
+          <td>{% if i.seccion.profesor %}{{ i.seccion.profesor.usuario.nombre }} {{ i.seccion.profesor.usuario.apellido }}{% else %}<span class="texto-suave">—</span>{% endif %}</td>
+          <td class="centro">{{ i.nota.promedio if i.nota else '—' }}</td>
+          <td class="centro">
+            {{ i.total_ausentes }} ({{ i.porcentaje_inasistencia }}%)
+          </td>
+          <td>
+            {% if i.pierde_materia %}
+              <span class="en-riesgo">En riesgo</span>
+            {% elif i.nota and i.nota.promedio >= 10 %}
+              <span class="aprobada">Aprobada</span>
+            {% else %}
+              <span class="texto-suave">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="sin-datos">No hay materias inscritas en el período actual.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
